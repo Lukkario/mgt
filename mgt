@@ -1,0 +1,129 @@
+#!/usr/bin/python2
+
+##########################################################
+# mgt (MocGoTray) version 0.1                            #
+# mgt is a Music On Consol panel applet for quick access #
+##########################################################
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+import os
+import subprocess
+
+class MocGoTray:
+	moc_not_running = "bash -c 'notify-send -t 3000 \"MOC is not running\" -i mgt-icon'"
+	moc_terminal = "xterm -e mocp"
+	def __init__(self, icon_name):
+		self.menu = Gtk.Menu()
+		self.Status_Icon = Gtk.StatusIcon()
+		self.Status_Icon.set_from_icon_name(icon_name)
+		self.Status_Icon.connect('popup-menu', self.right_click_event_statusicon)
+		self.Status_Icon.connect('activate', self.left_click_event_statusicon)
+		self.Status_Icon.connect('button-press-event', self.middle_click_event_statusicon)
+		os.system("mocp -S")
+
+	def check_moc(self):
+		self.check_moc_process = subprocess.Popen("pidof mocp", stdout=subprocess.PIPE, stderr=None, shell=True)
+		self.get_output_process = self.check_moc_process.communicate()[0]
+		if (self.get_output_process != ""):
+			return True
+		else:
+			return False
+
+	def check_moc_state(self):
+		self.check_state = subprocess.Popen("mocp -Q %state", stdout=subprocess.PIPE, stderr=None, shell=True)
+		self.get_output_state = self.check_state.communicate()[0][:4]
+		if (self.get_output_state == "STOP"):
+			return False
+		else:
+			return True
+
+	def moc_notify(self):
+		if(self.check_moc() == True):
+			if(self.check_moc_state() == True):
+				os.system("bash -c 'notify-send -t 3000 \"$(mocp -Q %artist)\" \"$(mocp -Q %song)\" -i mgt-icon'")
+			else:
+				os.system("bash -c 'notify-send -t 3000 \"Not selected song\" -i mgt-icon'")
+		else:
+			os.system(self.moc_not_running)
+
+
+	def add_menu_item(self, command, title):
+		Menu_item = Gtk.MenuItem()
+		Menu_item.set_label(title)
+		Menu_item.connect("activate", command)
+
+		self.menu.append(Menu_item)
+		self.menu.show_all()
+
+	def add_seperator(self):
+		Menu_item = Gtk.SeparatorMenuItem()
+		self.menu.append(Menu_item)
+		self.menu.show_all()
+
+	def get_tray_menu(self):
+		return self.menu
+
+	def left_click_event_statusicon(self, time):
+		if(self.check_moc() == True):
+			os.system("mocp --toggle-pause")
+		else:
+			os.system(self.moc_not_running)
+
+	def middle_click_event_statusicon(self, null, event):
+		if (event.button == 2):
+			self.moc_notify()
+
+
+	def right_click_event_statusicon(self, icon, button, time):
+		self.get_tray_menu()
+
+		def pos(menu, aicon):
+			return (Gtk.StatusIcon.position_menu(menu, aicon))
+
+		self.menu.popup(None, None, None, icon, button, time)
+
+	def open_moc(self):
+		os.system(self.moc_terminal)
+
+	def play_pause_song(self):
+		if(self.check_moc() == True):
+			os.system("mocp --toggle-pause")
+		else:
+			os.system(self.moc_not_running)
+
+	def play_next_song(self):
+		if(self.check_moc() == True):
+			os.system("mocp --next")
+		else:
+			os.system(self.moc_not_running)
+
+	def play_previous_song(self):
+		if(self.check_moc() == True):
+			os.system("mocp --previous")
+		else:
+			os.system(self.moc_not_running)
+
+	def Quit_mocgotray(self):
+		if(self.check_moc() == True):
+			os.system("mocp -x")
+			Gtk.main_quit()
+		else:
+			Gtk.main_quit()
+
+def main():
+	app = MocGoTray("mgt-icon")
+	app.add_menu_item(lambda x: app.open_moc(), "MOC")
+	app.add_menu_item(lambda x: app.moc_notify(), "Notify")
+	app.add_seperator()
+	app.add_menu_item(lambda x: app.play_pause_song(), "Play/Pause")
+	app.add_menu_item(lambda x: app.play_next_song(), "Next")
+	app.add_menu_item(lambda x: app.play_previous_song(), "Previous")
+	app.add_seperator()
+	app.add_menu_item(lambda x: app.Quit_mocgotray(), "Quit")
+
+	if __name__ == '__main__':
+		Gtk.main()
+
+main()
