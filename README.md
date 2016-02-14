@@ -15,9 +15,9 @@ Features
 * Pressing left mouse button will pause/play song
 * Pressing middle mouse button will pop up notification
 * Pressing right mouse button will open menu:
-..* MOC (opens xterm)
-..* Notify (pop up notification [made for touchpad users])
-..* Play/Pause
-..* Next
-..* Previous
-..* Quit
+  * MOC (opens xterm)
+  * Notify (pop up notification [made for touchpad users])
+  * Play/Pause
+  * Next
+  * Previous
+  * Quit
