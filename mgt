@@ -12,7 +12,7 @@ import os
 import subprocess
 
 class MocGoTray:
-	moc_not_running = "bash -c 'notify-send -t 3000 \"MOC is not running\" -i mgt-icon'"
+	moc_not_running = "bash -c 'notify-send -t 3000 \"MOC is not running\" -i gnome-music'"
 	moc_terminal = "xterm -e mocp"
 	def __init__(self, icon_name):
 		self.menu = Gtk.Menu()
@@ -42,9 +42,9 @@ class MocGoTray:
 	def moc_notify(self):
 		if(self.check_moc() == True):
 			if(self.check_moc_state() == True):
-				os.system("bash -c 'notify-send -t 3000 \"$(mocp -Q %artist)\" \"$(mocp -Q %song)\" -i mgt-icon'")
+				os.system("bash -c 'notify-send -t 3000 \"$(mocp -Q %artist)\" \"$(mocp -Q %song)\" -i gnome-music'")
 			else:
-				os.system("bash -c 'notify-send -t 3000 \"Not selected song\" -i mgt-icon'")
+				os.system("bash -c 'notify-send -t 3000 \"Not selected song\" -i gnome-music'")
 		else:
 			os.system(self.moc_not_running)
 
@@ -113,7 +113,7 @@ class MocGoTray:
 			Gtk.main_quit()
 
 def main():
-	app = MocGoTray("mgt-icon")
+	app = MocGoTray("gnome-music")
 	app.add_menu_item(lambda x: app.open_moc(), "MOC")
 	app.add_menu_item(lambda x: app.moc_notify(), "Notify")
 	app.add_seperator()
